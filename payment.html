@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ebook Request — Payment & Order Confirmation</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --amber:#d97706;--amber2:#f59e0b;--amber3:#fbbf24;--amber4:#fde68a;
+  --brown:#78350f;--brown2:#92400e;--brown3:#451a03;
+  --cream:#fefce8;--cream2:#fffbeb;--cream3:#fef9c3;
+  --white:#ffffff;--border:#e5d5a3;--border2:#d4b896;
+  --text:#1c1007;--muted:#78650a;--muted2:#a37528;
+  --green:#15803d;--green2:#dcfce7;--green3:#bbf7d0;
+  --red:#b91c1c;--blue:#1d4ed8;
+  --shadow:0 2px 16px rgba(120,53,15,0.09);
+  --shadow2:0 10px 48px rgba(120,53,15,0.15);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14.5px;line-height:1.65;min-height:100vh}
+
+/* ── HEADER ── */
+header{background:linear-gradient(150deg,var(--brown3) 0%,var(--brown2) 45%,var(--brown) 100%);position:relative;overflow:hidden}
+header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(253,230,138,0.09) 0%,transparent 50%),radial-gradient(circle at 10% 80%,rgba(255,255,255,0.04) 0%,transparent 40%);pointer-events:none}
+header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3.5px;background:linear-gradient(90deg,var(--amber) 0%,var(--amber2) 40%,var(--amber3) 60%,var(--amber2) 80%,var(--amber) 100%)}
+
+.header-inner{max-width:720px;margin:0 auto;padding:28px 24px 36px;display:flex;align-items:center;gap:18px;position:relative;z-index:1}
+.logo-badge{background:linear-gradient(135deg,var(--amber4) 0%,var(--amber3) 50%,var(--amber2) 100%);border-radius:14px;padding:10px 14px;box-shadow:0 0 0 3px rgba(251,191,36,0.28),0 8px 28px rgba(0,0,0,0.35);animation:pulse-logo 3.5s ease-in-out infinite;text-align:center;min-width:64px;flex-shrink:0}
+@keyframes pulse-logo{0%,100%{box-shadow:0 0 0 3px rgba(251,191,36,0.28),0 8px 28px rgba(0,0,0,0.35)}50%{box-shadow:0 0 0 8px rgba(251,191,36,0.1),0 14px 38px rgba(0,0,0,0.42)}}
+.logo-badge .logo-icon{font-size:26px;display:block;line-height:1}
+.logo-badge .logo-label{font-size:0.56rem;font-weight:700;color:var(--brown3);letter-spacing:0.06em;text-transform:uppercase;margin-top:3px}
+.header-text .brand{font-size:0.7rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--amber3);margin-bottom:4px}
+.header-text h1{font-family:'Lora',serif;font-size:1.7rem;font-weight:700;color:#fff;line-height:1.2}
+.header-text h1 span{color:var(--amber3);font-style:italic}
+.header-text p{color:rgba(255,255,255,0.48);font-size:0.75rem;margin-top:5px}
+
+/* ── MAIN ── */
+main{max-width:720px;margin:0 auto;padding:24px 20px 64px}
+
+/* ── STATES ── */
+#state-loading,#state-invalid,#state-paid,#state-content{display:none}
+#state-loading.active,#state-invalid.active,#state-paid.active,#state-content.active{display:block}
+
+/* ── LOADING ── */
+.loading-box{text-align:center;padding:60px 20px}
+.spinner{width:44px;height:44px;border:4px solid var(--border);border-top-color:var(--amber2);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-box p{color:var(--muted2);font-size:0.9rem}
+
+/* ── INVALID ── */
+.invalid-box{text-align:center;padding:60px 20px;background:var(--white);border-radius:16px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.invalid-box .ico{font-size:3rem;margin-bottom:14px}
+.invalid-box h2{font-family:'Lora',serif;font-size:1.4rem;color:var(--red);margin-bottom:8px}
+.invalid-box p{color:var(--muted2);font-size:0.88rem;line-height:1.7}
+
+/* ── ALREADY PAID ── */
+.paid-box{text-align:center;padding:50px 20px;background:var(--green2);border-radius:16px;border:2px solid var(--green3);box-shadow:var(--shadow)}
+.paid-box .ico{font-size:3rem;margin-bottom:14px}
+.paid-box h2{font-family:'Lora',serif;font-size:1.4rem;color:var(--green);margin-bottom:8px}
+.paid-box p{color:#166534;font-size:0.88rem;line-height:1.7}
+
+/* ── CARD ── */
+.card{background:var(--white);border-radius:16px;margin-bottom:18px;box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--border);opacity:0;transform:translateY(14px);animation:rise 0.4s ease forwards}
+.card:nth-child(1){animation-delay:.04s}.card:nth-child(2){animation-delay:.1s}.card:nth-child(3){animation-delay:.16s}.card:nth-child(4){animation-delay:.22s}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+.ch{background:linear-gradient(100deg,var(--brown3) 0%,var(--brown2) 100%);padding:13px 22px;display:flex;align-items:center;gap:12px}
+.ch .ico{width:30px;height:30px;border-radius:7px;background:rgba(251,191,36,0.18);border:1px solid rgba(251,191,36,0.3);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.ch h2{font-family:'Lora',serif;font-size:1rem;font-weight:600;color:#fff}
+.cb{padding:20px 22px}
+
+/* ── REF BADGE ── */
+.ref-badge{background:linear-gradient(135deg,var(--amber4),var(--cream3));border:2px solid var(--amber3);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.ref-badge .ref-left .ref-lbl{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--amber);margin-bottom:3px}
+.ref-badge .ref-left .ref-val{font-family:monospace;font-size:1.2rem;font-weight:700;color:var(--brown3);letter-spacing:0.05em}
+.ref-badge .status-chip{border-radius:20px;padding:5px 14px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em}
+.chip-payment{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.chip-confirmed{background:var(--green2);color:var(--green);border:1px solid var(--green3)}
+
+/* ── ORDER ROWS ── */
+.order-row{display:flex;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.83rem;gap:10px}
+.order-row:last-child{border-bottom:none}
+.order-key{width:160px;flex-shrink:0;font-weight:600;color:var(--muted);font-size:0.73rem;text-transform:uppercase;letter-spacing:0.04em;padding-top:2px}
+.order-val{flex:1;color:var(--text);word-break:break-word;line-height:1.6}
+.book-line{padding:4px 0;border-bottom:1px dashed #e5d5a3;font-size:0.82rem}
+.book-line:last-child{border-bottom:none}
+
+/* ── AMOUNT TABLE ── */
+.amount-table{width:100%;border-collapse:collapse;font-size:0.84rem}
+.amount-table td{padding:8px 0;border-bottom:1px dashed var(--border)}
+.amount-table tr:last-child td{border-bottom:none}
+.amount-table .amt-label{color:var(--muted2)}
+.amount-table .amt-val{text-align:right;font-weight:600;color:var(--text)}
+.amount-table .total-row td{padding-top:12px;font-weight:700;font-size:1rem;color:var(--brown3);border-top:2px solid var(--amber3);border-bottom:none}
+.amount-table .total-row .amt-val{font-size:1.1rem;color:var(--green)}
+
+/* ── PAYMENT METHODS ── */
+.pay-methods{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.pay-method{background:var(--cream2);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:14px}
+.pay-method:hover{border-color:var(--amber2);background:var(--amber4)}
+.pay-method.selected{border-color:var(--amber2);background:var(--amber4);box-shadow:0 0 0 3px rgba(245,158,11,0.12)}
+.pay-method .pm-ico{font-size:1.6rem;flex-shrink:0}
+.pay-method .pm-info .pm-name{font-weight:700;font-size:0.9rem;color:var(--brown3)}
+.pay-method .pm-info .pm-detail{font-size:0.78rem;color:var(--muted2);margin-top:2px}
+.pay-method input[type=radio]{width:17px;height:17px;accent-color:var(--amber2);flex-shrink:0;margin-left:auto}
+
+/* ── UPLOAD ── */
+.upload-zone{border:2px dashed var(--border2);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;background:var(--cream2)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--amber2);background:var(--amber4)}
+.upload-zone .uz-ico{font-size:1.8rem;margin-bottom:6px}
+.upload-zone p{font-size:0.8rem;color:var(--muted)}
+.upload-zone input{display:none}
+.file-preview{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+.fp-chip{background:var(--cream3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.75rem;color:var(--brown2);display:flex;align-items:center;gap:5px}
+.fp-chip button{background:none;border:none;color:var(--red);cursor:pointer;font-size:0.85rem;line-height:1;padding:0 2px}
+
+/* ── SUBMIT BTN ── */
+.sbtn{width:100%;background:linear-gradient(135deg,var(--green) 0%,#166534 100%);color:#fff;border:none;border-radius:12px;padding:15px 24px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:0.02em}
+.sbtn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(21,128,61,0.28)}
+.sbtn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.sbtn.loading{animation:btn-pulse 1.5s ease-in-out infinite}
+@keyframes btn-pulse{0%,100%{opacity:1}50%{opacity:0.7}}
+
+/* ── SUCCESS OVERLAY ── */
+#success-overlay{display:none;position:fixed;inset:0;background:rgba(69,26,3,0.7);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;padding:20px}
+#success-overlay.open{display:flex}
+.suc-box{background:#fff;border-radius:20px;max-width:480px;width:100%;padding:40px 32px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.3)}
+.suc-ico{font-size:3.5rem;margin-bottom:14px;display:block}
+.suc-box h2{font-family:'Lora',serif;font-size:1.6rem;color:var(--green);margin-bottom:8px}
+.suc-box p{color:var(--muted2);font-size:0.88rem;line-height:1.7;margin-bottom:18px}
+.suc-ref{background:var(--green2);border:2px solid var(--green3);border-radius:10px;padding:12px 18px;margin:14px 0}
+.suc-ref .ref-lbl{font-size:0.7rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px}
+.suc-ref .ref-val{font-family:monospace;font-size:1.1rem;font-weight:700;color:#166534}
+.suc-close{background:linear-gradient(135deg,var(--green),#166534);color:#fff;border:none;border-radius:9px;padding:12px 28px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:700;cursor:pointer;margin-top:8px;transition:all .15s}
+.suc-close:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(21,128,61,0.3)}
+
+/* ── HINT ── */
+.hint{font-size:0.73rem;color:var(--muted2);margin-top:4px;line-height:1.5}
+label{display:block;font-size:0.78rem;font-weight:600;color:var(--brown2);margin-bottom:5px;letter-spacing:0.02em}
+.req{color:var(--red);margin-left:2px}
+input,textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);background:var(--cream2);outline:none;transition:border-color .15s}
+input:focus,textarea:focus{border-color:var(--amber2);background:#fff;box-shadow:0 0 0 3px rgba(245,158,11,0.1)}
+input.err{border-color:var(--red)!important;background:#fff5f5}
+textarea{resize:vertical;min-height:70px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--brown3);color:#fff;border-radius:10px;padding:12px 20px;font-size:0.84rem;font-weight:500;z-index:3000;opacity:0;pointer-events:none;transition:opacity .3s;max-width:340px}
+#toast.show{opacity:1;pointer-events:auto}
+#toast.success{background:#064e3b}
+#toast.error{background:#7f1d1d}
+
+@media(max-width:600px){
+  .header-text h1{font-size:1.35rem}
+  .ref-badge{flex-direction:column;align-items:flex-start;gap:8px}
+  .order-key{width:120px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-badge">
+      <span class="logo-icon">📚</span>
+      <span class="logo-label">EBook</span>
+    </div>
+    <div class="header-text">
+      <div class="brand">Ebook Request Service</div>
+      <h1>Payment & <span>Order Confirmation</span></h1>
+      <p>Review your located books and confirm payment below.</p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- LOADING STATE -->
+  <div id="state-loading" class="active">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p>Loading your order details...</p>
+    </div>
+  </div>
+
+  <!-- INVALID / NOT FOUND -->
+  <div id="state-invalid">
+    <div class="invalid-box">
+      <div class="ico">❌</div>
+      <h2>Invalid Payment Link</h2>
+      <p>This payment link is invalid, has expired, or no longer exists.<br/>Please contact us on our <strong>Facebook Page</strong> for assistance.</p>
+    </div>
+  </div>
+
+  <!-- ALREADY PAID -->
+  <div id="state-paid">
+    <div class="paid-box">
+      <div class="ico">✅</div>
+      <h2>Payment Already Confirmed!</h2>
+      <p id="paid-message">This order has already been marked as paid and confirmed.<br/>Thank you for your payment! We'll send your ebooks shortly.</p>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="state-content">
+
+    <!-- ORDER SUMMARY CARD -->
+    <div class="card" id="order-card">
+      <div class="ch"><div class="ico">📋</div><h2>Order Summary</h2></div>
+      <div class="cb">
+        <div class="ref-badge">
+          <div class="ref-left">
+            <div class="ref-lbl">Reference Number</div>
+            <div class="ref-val" id="display-ref">—</div>
+          </div>
+          <span class="status-chip chip-payment" id="display-status-chip">For Payment</span>
+        </div>
+
+        <div id="order-details">
+          <div class="order-row"><div class="order-key">Client Name</div><div class="order-val" id="disp-name">—</div></div>
+          <div class="order-row"><div class="order-key">Email</div><div class="order-val" id="disp-email">—</div></div>
+          <div class="order-row"><div class="order-key">Facebook Link</div><div class="order-val" id="disp-fb">—</div></div>
+          <div class="order-row"><div class="order-key">Format</div><div class="order-val" id="disp-format">—</div></div>
+          <div class="order-row"><div class="order-key">Books Located</div><div class="order-val" id="disp-books">—</div></div>
+          <div class="order-row"><div class="order-key">Notes</div><div class="order-val" id="disp-notes">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AMOUNT CARD -->
+    <div class="card" id="amount-card">
+      <div class="ch"><div class="ico">💰</div><h2>Payment Amount</h2></div>
+      <div class="cb">
+        <table class="amount-table">
+          <tbody id="amount-tbody">
+            <tr><td class="amt-label">Research Fee</td><td class="amt-val">₱49.00 × <span id="books-located-count">0</span> book(s)</td></tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row"><td class="amt-label">Total Amount Due</td><td class="amt-val" id="total-amount">₱0.00</td></tr>
+          </tfoot>
+        </table>
+        <div class="hint" style="margin-top:10px">Research fee is ₱49 per successfully located ebook/file. Payment confirms your order.</div>
+      </div>
+    </div>
+
+    <!-- PAYMENT METHOD CARD -->
+    <div class="card" id="payment-card">
+      <div class="ch"><div class="ico">💳</div><h2>Payment Method</h2></div>
+      <div class="cb">
+        <p style="font-size:0.82rem;color:var(--muted2);margin-bottom:14px">Select your preferred payment method and upload your proof of payment.</p>
+
+        <div class="pay-methods" id="pay-methods">
+          <label class="pay-method" onclick="selectMethod('GCash')">
+            <div class="pm-ico">💚</div>
+            <div class="pm-info">
+              <div class="pm-name">GCash</div>
+              <div class="pm-detail" id="gcash-detail">Send to: — (see admin note)</div>
+            </div>
+            <input type="radio" name="pay_method" value="GCash"/>
+          </label>
+          <label class="pay-method" onclick="selectMethod('Maya')">
+            <div class="pm-ico">💜</div>
+            <div class="pm-info">
+              <div class="pm-name">Maya (PayMaya)</div>
+              <div class="pm-detail" id="maya-detail">Send to: — (see admin note)</div>
+            </div>
+            <input type="radio" name="pay_method" value="Maya"/>
+          </label>
+          <label class="pay-method" onclick="selectMethod('Bank Transfer')">
+            <div class="pm-ico">🏦</div>
+            <div class="pm-info">
+              <div class="pm-name">Bank Transfer</div>
+              <div class="pm-detail" id="bank-detail">Account details — see admin note</div>
+            </div>
+            <input type="radio" name="pay_method" value="Bank Transfer"/>
+          </label>
+        </div>
+
+        <div id="payment-instructions" style="background:var(--amber4);border:1.5px solid var(--amber3);border-radius:10px;padding:14px 16px;font-size:0.82rem;color:var(--brown2);margin-bottom:16px;display:none">
+          <strong>💡 Payment Instructions:</strong><br/>
+          <span id="instructions-text"></span>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label>Sender Name (as shown in payment) <span class="req">*</span></label>
+          <input type="text" id="sender-name" placeholder="e.g. Juan dela Cruz"/>
+        </div>
+
+        <div style="margin-bottom:6px">
+          <label>Attach Proof of Payment <span class="req">*</span></label>
+          <div class="upload-zone" id="proof-zone" onclick="document.getElementById('proof-input').click()" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+            <div class="uz-ico">📎</div>
+            <p><strong>Click to attach</strong> or drag &amp; drop your payment screenshot</p>
+            <p style="font-size:0.74rem;margin-top:4px">PNG, JPG, JPEG, PDF — max 5MB</p>
+            <input type="file" id="proof-input" accept="image/*,.pdf" onchange="handleProofSelect(event)"/>
+          </div>
+          <div class="file-preview" id="proof-preview"></div>
+        </div>
+
+        <div style="margin-bottom:18px;margin-top:14px">
+          <label>Additional Message (Optional)</label>
+          <textarea id="pay-message" placeholder="Any notes about your payment..."></textarea>
+        </div>
+
+        <button class="sbtn" id="confirm-btn" onclick="confirmPayment()">✅ Confirm Payment & Submit</button>
+      </div>
+    </div>
+
+    <!-- TERMS REMINDER -->
+    <div style="background:var(--cream3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-size:0.78rem;color:var(--muted2);line-height:1.7;margin-bottom:8px">
+      📋 By confirming payment, you acknowledge our ₱49/book research fee and agree that file quality is based solely on what is publicly available online. All follow-ups will be done via our <strong>Facebook Page</strong>.
+    </div>
+
+  </div><!-- /state-content -->
+</main>
+
+<!-- SUCCESS OVERLAY -->
+<div id="success-overlay">
+  <div class="suc-box">
+    <span class="suc-ico">🎉</span>
+    <h2>Payment Submitted!</h2>
+    <p>Your payment has been submitted for confirmation. We'll verify your proof of payment and send your ebooks shortly. Thank you!</p>
+    <div class="suc-ref">
+      <div class="ref-lbl">Reference Number</div>
+      <div class="ref-val" id="suc-ref-display">—</div>
+    </div>
+    <p style="font-size:0.8rem;color:var(--muted2)">Please message us on our <strong>Facebook Page</strong> if you have any concerns.</p>
+    <button class="suc-close" onclick="document.getElementById('success-overlay').classList.remove('open')">✓ Done</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────────────
+const SCRIPT_URL = localStorage.getItem('ebr_script_url') || '';
+const SHEET_ID_LINK = '13hbgb6mQadUxEhgPIywGI3__u_7gs_rLkbyjPb-aZZU';
+const FOLDER_LINK   = 'https://drive.google.com/drive/folders/1ySwDnk5k8bLdnBTpop3aYYlqBXq4nZHI';
+
+// Payment account details — set these in admin config or hardcode here
+const PAYMENT_ACCOUNTS = {
+  gcash: localStorage.getItem('ebr_gcash') || '09XX-XXX-XXXX',
+  maya:  localStorage.getItem('ebr_maya')  || '09XX-XXX-XXXX',
+  bank:  localStorage.getItem('ebr_bank')  || 'Bank Name — Account # XXXX-XXXX'
+};
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let orderData = null;
+let proofFile = null;
+let selectedMethod = null;
+
+// ── INIT: READ URL PARAMS ────────────────────────────────────────────────────
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const ref    = params.get('ref');
+  const token  = params.get('token');
+
+  if (!ref) { showState('invalid'); return; }
+
+  // Validate token — token = simple base64 of ref (matches what admin generates)
+  const expectedToken = btoa(ref).replace(/=/g, '');
+  if (token && token !== expectedToken) { showState('invalid'); return; }
+
+  // Try to fetch from Google Sheets via Apps Script
+  if (SCRIPT_URL && SCRIPT_URL !== '') {
+    try {
+      const res  = await fetch(`${SCRIPT_URL}?action=getByRef&ref=${encodeURIComponent(ref)}`);
+      const json = await res.json();
+      if (!json.found) { showState('invalid'); return; }
+      orderData = json.data;
+    } catch (e) {
+      // Fallback: build order from URL params for demo
+      orderData = buildFromParams(params);
+    }
+  } else {
+    // Demo mode — read from URL params
+    orderData = buildFromParams(params);
+  }
+
+  if (!orderData) { showState('invalid'); return; }
+
+  // Check if already paid
+  if (orderData.status === 'Completed' || orderData.payment_confirmed === 'Yes') {
+    document.getElementById('paid-message').textContent =
+      `Order ${orderData.reference_no} has already been confirmed and paid. Thank you, ${orderData.client_name}!`;
+    showState('paid'); return;
+  }
+
+  renderOrder();
+  updatePaymentDetails();
+  showState('content');
+}
+
+function buildFromParams(params) {
+  // Build order object from URL params (used when admin shares enriched links)
+  const ref = params.get('ref');
+  if (!ref) return null;
+  return {
+    reference_no: ref,
+    client_name:  decodeURIComponent(params.get('name')   || ''),
+    client_email: decodeURIComponent(params.get('email')  || ''),
+    client_phone: decodeURIComponent(params.get('fb')     || ''),
+    preferred_format: decodeURIComponent(params.get('fmt') || ''),
+    books_requested:  decodeURIComponent(params.get('books') || ''),
+    books_located:    decodeURIComponent(params.get('located') || ''),
+    books_located_count: parseInt(params.get('count') || '1'),
+    notes:  decodeURIComponent(params.get('notes') || ''),
+    status: decodeURIComponent(params.get('status') || 'For Payment'),
+    admin_notes: decodeURIComponent(params.get('anotes') || ''),
+  };
+}
+
+function showState(state) {
+  ['loading','invalid','paid','content'].forEach(s => {
+    document.getElementById('state-' + s).classList.toggle('active', s === state);
+  });
+}
+
+// ── RENDER ORDER ─────────────────────────────────────────────────────────────
+function renderOrder() {
+  const r = orderData;
+  document.getElementById('display-ref').textContent = r.reference_no;
+
+  // Status chip
+  const chip = document.getElementById('display-status-chip');
+  if (r.status === 'Order Confirmed' || r.status === 'Completed') {
+    chip.textContent = 'Order Confirmed';
+    chip.className = 'status-chip chip-confirmed';
+  } else {
+    chip.textContent = r.status || 'For Payment';
+    chip.className = 'status-chip chip-payment';
+  }
+
+  document.getElementById('disp-name').textContent    = r.client_name   || '—';
+  document.getElementById('disp-email').textContent   = r.client_email  || '—';
+
+  const fb = r.client_phone || '';
+  document.getElementById('disp-fb').innerHTML = fb
+    ? `<a href="${fb}" target="_blank" style="color:var(--amber)">${fb}</a>` : '—';
+
+  document.getElementById('disp-format').textContent  = r.preferred_format || '—';
+
+  // Books
+  const located = r.books_located || r.books_requested || '';
+  const bookLines = located.split('|').filter(b => b.trim()).map(b =>
+    `<div class="book-line">📖 ${b.trim()}</div>`).join('');
+  document.getElementById('disp-books').innerHTML = bookLines || '—';
+
+  document.getElementById('disp-notes').textContent   = r.notes || '—';
+
+  // Amount
+  const count = parseInt(r.books_located_count) || located.split('|').filter(b => b.trim()).length || 1;
+  const total = count * 49;
+  document.getElementById('books-located-count').textContent = count;
+  document.getElementById('total-amount').textContent = `₱${total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}.00`;
+  document.title = `Payment — ${r.reference_no} | Ebook Request`;
+
+  // Pre-fill sender name
+  const senderInput = document.getElementById('sender-name');
+  if (r.client_name) senderInput.placeholder = `e.g. ${r.client_name}`;
+}
+
+function updatePaymentDetails() {
+  document.getElementById('gcash-detail').textContent = `Send to: ${PAYMENT_ACCOUNTS.gcash}`;
+  document.getElementById('maya-detail').textContent  = `Send to: ${PAYMENT_ACCOUNTS.maya}`;
+  document.getElementById('bank-detail').textContent  = PAYMENT_ACCOUNTS.bank;
+}
+
+// ── PAYMENT METHOD ────────────────────────────────────────────────────────────
+const methodInstructions = {
+  'GCash':         `Send the exact amount to GCash number: <strong>${PAYMENT_ACCOUNTS.gcash}</strong>. Screenshot your receipt and upload below.`,
+  'Maya':          `Send the exact amount to Maya number: <strong>${PAYMENT_ACCOUNTS.maya}</strong>. Screenshot your receipt and upload below.`,
+  'Bank Transfer': `Transfer to: <strong>${PAYMENT_ACCOUNTS.bank}</strong>. Screenshot your transfer confirmation and upload below.`,
+};
+function selectMethod(method) {
+  selectedMethod = method;
+  document.querySelectorAll('.pay-method').forEach(el => el.classList.remove('selected'));
+  const labels = document.querySelectorAll('.pay-method');
+  labels.forEach(el => {
+    const radio = el.querySelector('input[type=radio]');
+    if (radio?.value === method) { el.classList.add('selected'); radio.checked = true; }
+  });
+  const box = document.getElementById('payment-instructions');
+  document.getElementById('instructions-text').innerHTML = methodInstructions[method] || '';
+  box.style.display = 'block';
+}
+
+// ── FILE UPLOAD ───────────────────────────────────────────────────────────────
+function handleDragOver(e) { e.preventDefault(); document.getElementById('proof-zone').classList.add('drag'); }
+function handleDragLeave(e) { document.getElementById('proof-zone').classList.remove('drag'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('proof-zone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) setProofFile(file);
+}
+function handleProofSelect(e) {
+  const file = e.target.files[0];
+  if (file) setProofFile(file);
+}
+function setProofFile(file) {
+  if (file.size > 5 * 1024 * 1024) { toast('File too large — max 5MB.', 'error'); return; }
+  proofFile = file;
+  document.getElementById('proof-preview').innerHTML =
+    `<div class="fp-chip">📸 ${file.name} <button onclick="removeProof()">✕</button></div>`;
+}
+function removeProof() {
+  proofFile = null;
+  document.getElementById('proof-preview').innerHTML = '';
+  document.getElementById('proof-input').value = '';
+}
+
+// ── CONFIRM PAYMENT ───────────────────────────────────────────────────────────
+async function confirmPayment() {
+  if (!selectedMethod) { toast('Please select a payment method.', 'error'); return; }
+  const senderName = document.getElementById('sender-name').value.trim();
+  if (!senderName) { document.getElementById('sender-name').classList.add('err'); toast('Please enter the sender name.', 'error'); return; }
+  if (!proofFile)  { toast('Please upload your proof of payment.', 'error'); return; }
+
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true; btn.textContent = '⏳ Submitting...'; btn.classList.add('loading');
+
+  const r = orderData;
+  const count = parseInt(r.books_located_count) || r.books_requested?.split('|').filter(b=>b.trim()).length || 1;
+
+  const payload = {
+    action: 'confirmPayment',
+    reference_no: r.reference_no,
+    payment_method: selectedMethod,
+    sender_name: senderName,
+    total_paid: `₱${(count * 49).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
+    pay_message: document.getElementById('pay-message').value.trim(),
+    payment_submitted_at: new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' }),
+    status: 'Payment Submitted'
+  };
+
+  if (SCRIPT_URL && SCRIPT_URL !== '') {
+    try {
+      const fd = new FormData();
+      Object.entries(payload).forEach(([k, v]) => fd.append(k, v));
+      fd.append('proof_of_payment', proofFile, proofFile.name);
+      await fetch(SCRIPT_URL, { method: 'POST', body: fd });
+    } catch (e) { /* still show success in demo */ }
+  }
+
+  document.getElementById('suc-ref-display').textContent = r.reference_no;
+  document.getElementById('success-overlay').classList.add('open');
+  btn.disabled = false; btn.textContent = '✅ Confirm Payment & Submit'; btn.classList.remove('loading');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.className = 'show ' + type;
+  t.textContent = type === 'success' ? '✅ ' + msg : type === 'error' ? '❌ ' + msg : 'ℹ️ ' + msg;
+  setTimeout(() => { t.className = ''; }, 4000);
+}
+
+// ── START ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

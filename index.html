@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ebook Request — Find Any Book</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --amber:#d97706;--amber2:#f59e0b;--amber3:#fbbf24;--amber4:#fde68a;
+  --brown:#78350f;--brown2:#92400e;--brown3:#451a03;
+  --cream:#fefce8;--cream2:#fffbeb;--cream3:#fef9c3;
+  --white:#ffffff;--border:#e5d5a3;--border2:#d4b896;
+  --text:#1c1007;--muted:#78650a;--muted2:#a37528;
+  --green:#15803d;--green2:#dcfce7;
+  --red:#b91c1c;--sky:#e0f2fe;
+  --shadow:0 2px 16px rgba(120,53,15,0.09);
+  --shadow2:0 10px 48px rgba(120,53,15,0.15);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14.5px;line-height:1.65}
+
+/* ── HEADER ── */
+header{background:linear-gradient(150deg,var(--brown3) 0%,var(--brown2) 45%,var(--brown) 100%);position:relative;overflow:hidden}
+header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(253,230,138,0.09) 0%,transparent 50%),radial-gradient(circle at 10% 80%,rgba(255,255,255,0.04) 0%,transparent 40%);pointer-events:none}
+header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3.5px;background:linear-gradient(90deg,var(--amber) 0%,var(--amber2) 40%,var(--amber3) 60%,var(--amber2) 80%,var(--amber) 100%)}
+
+.header-inner{max-width:960px;margin:0 auto;padding:32px 28px 40px;display:flex;align-items:center;gap:22px;position:relative;z-index:1}
+.logo-badge{background:linear-gradient(135deg,var(--amber4) 0%,var(--amber3) 50%,var(--amber2) 100%);border-radius:14px;padding:10px 14px;box-shadow:0 0 0 3px rgba(251,191,36,0.28),0 8px 28px rgba(0,0,0,0.35);animation:pulse-logo 3.5s ease-in-out infinite;text-align:center;min-width:66px;flex-shrink:0}
+@keyframes pulse-logo{0%,100%{box-shadow:0 0 0 3px rgba(251,191,36,0.28),0 8px 28px rgba(0,0,0,0.35)}50%{box-shadow:0 0 0 8px rgba(251,191,36,0.1),0 14px 38px rgba(0,0,0,0.42)}}
+.logo-badge .logo-icon{font-size:28px;display:block;line-height:1}
+.logo-badge .logo-label{font-family:'DM Sans',sans-serif;font-size:0.58rem;font-weight:700;color:var(--brown3);letter-spacing:0.06em;text-transform:uppercase;margin-top:3px}
+.header-text{flex:1}
+.header-text .brand{font-size:0.7rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--amber3);margin-bottom:5px}
+.header-text h1{font-family:'Lora',serif;font-size:2rem;font-weight:700;color:#fff;line-height:1.18;letter-spacing:-0.01em}
+.header-text h1 span{color:var(--amber3);font-style:italic}
+.header-text p{color:rgba(255,255,255,0.48);font-size:0.76rem;font-weight:300;letter-spacing:0.05em;margin-top:7px}
+.header-pills{margin-left:auto;flex-shrink:0;display:flex;flex-direction:column;gap:5px}
+.pill{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);border-radius:20px;padding:4px 13px;font-size:0.66rem;font-weight:500;color:rgba(255,255,255,0.6);letter-spacing:0.05em;white-space:nowrap}
+.pill.amber{background:rgba(251,191,36,0.14);border-color:rgba(251,191,36,0.3);color:var(--amber3)}
+
+/* ── PROG BAR ── */
+.prog-wrap{background:rgba(0,0,0,0.2);padding:0 28px 14px;display:flex;justify-content:center}
+.prog-inner{display:flex;align-items:center;max-width:960px;width:100%;gap:14px}
+.steps{display:flex;flex:1;gap:0}
+.step{flex:1;display:flex;align-items:center;font-size:0.67rem;font-weight:500;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:0.07em;padding:7px 3px;padding-top:14px}
+.step .dot{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.16);margin-right:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:700;color:rgba(255,255,255,0.22)}
+.step.on{color:var(--amber3)}
+.step.on .dot{background:var(--amber2);border-color:var(--amber3);color:var(--brown3);box-shadow:0 0 8px rgba(251,191,36,0.5)}
+.track-inline{display:flex;align-items:center;gap:7px;flex-shrink:0;padding-top:14px}
+.track-lbl{font-size:0.68rem;color:rgba(255,255,255,0.45);white-space:nowrap}
+.track-inline input{border:1px solid rgba(255,255,255,0.22);background:rgba(255,255,255,0.1);color:#fff;border-radius:7px;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:0.75rem;outline:none;width:155px;transition:all .15s}
+.track-inline input::placeholder{color:rgba(255,255,255,0.3)}
+.track-inline input:focus{border-color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.16)}
+.track-btn{background:var(--amber2);color:var(--brown3);border:none;border-radius:7px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:0.74rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
+.track-btn:hover{background:var(--amber3)}
+
+/* ── DISCLAIMER ── */
+.disclaimer{max-width:960px;margin:22px auto 0;padding:0 20px}
+.disclaimer-inner{background:var(--cream3);border:1.5px solid #d4b896;border-left:4px solid var(--amber);border-radius:10px;padding:12px 16px;font-size:0.79rem;color:var(--brown2);display:flex;gap:10px;align-items:flex-start;line-height:1.7}
+.disclaimer-inner span{font-size:1.05rem;flex-shrink:0;margin-top:1px}
+
+/* ── MAIN ── */
+main{max-width:960px;margin:0 auto;padding:22px 20px 64px}
+
+/* ── CARD ── */
+.card{background:var(--white);border-radius:16px;margin-bottom:20px;box-shadow:var(--shadow);overflow:hidden;opacity:0;transform:translateY(16px);animation:rise 0.42s ease forwards;border:1px solid var(--border)}
+.card:nth-child(1){animation-delay:.04s}.card:nth-child(2){animation-delay:.09s}.card:nth-child(3){animation-delay:.14s}.card:nth-child(4){animation-delay:.19s}.card:nth-child(5){animation-delay:.24s}.card:nth-child(6){animation-delay:.29s}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+.card:hover{box-shadow:var(--shadow2);transition:box-shadow .25s}
+.card.dynamic-section{display:none}
+.card.dynamic-section.visible{display:block;animation:rise 0.35s ease forwards}
+
+.ch{background:linear-gradient(100deg,var(--brown3) 0%,var(--brown2) 100%);padding:13px 22px;display:flex;align-items:center;gap:12px}
+.ch .ico{width:30px;height:30px;border-radius:7px;background:rgba(251,191,36,0.18);border:1px solid rgba(251,191,36,0.3);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.ch h2{font-family:'Lora',serif;font-size:1rem;font-weight:600;color:#fff;letter-spacing:0.02em}
+.cb{padding:20px 22px}
+
+/* ── FORM CONTROLS ── */
+.row{display:flex;gap:14px;margin-bottom:14px}
+.row>.field{flex:1;min-width:0}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label{display:block;font-size:0.78rem;font-weight:600;color:var(--brown2);margin-bottom:5px;letter-spacing:0.02em}
+label .req{color:var(--red);margin-left:2px}
+input,select,textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);background:var(--cream2);outline:none;transition:border-color .15s,background .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--amber2);background:#fff;box-shadow:0 0 0 3px rgba(245,158,11,0.1)}
+input.err,select.err,textarea.err{border-color:var(--red)!important;background:#fff5f5}
+textarea{resize:vertical;min-height:90px}
+select{cursor:pointer}
+.hint{font-size:0.72rem;color:var(--muted2);margin-top:4px;line-height:1.55}
+
+/* ── BOOK ITEMS ── */
+.books-list{display:flex;flex-direction:column;gap:12px}
+.book-item{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:14px;position:relative}
+.book-item .remove-btn{position:absolute;top:10px;right:10px;background:none;border:1px solid #eee;border-radius:6px;padding:2px 7px;font-size:0.7rem;color:var(--muted);cursor:pointer;transition:all .15s}
+.book-item .remove-btn:hover{background:#fee2e2;border-color:#fca5a5;color:var(--red)}
+.book-num{font-size:0.72rem;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px}
+.add-book-btn{background:var(--cream3);border:1.5px dashed var(--amber2);border-radius:9px;padding:10px;width:100%;font-family:'DM Sans',sans-serif;font-size:0.84rem;font-weight:600;color:var(--brown2);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:8px}
+.add-book-btn:hover{background:var(--amber4);border-color:var(--amber)}
+
+/* ── UPLOAD ── */
+.upload-zone{border:2px dashed var(--border2);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;background:var(--cream2)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--amber2);background:var(--amber4)}
+.upload-zone .uz-ico{font-size:1.8rem;margin-bottom:6px}
+.upload-zone p{font-size:0.8rem;color:var(--muted)}
+.upload-zone input{display:none}
+.file-preview{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+.fp-chip{background:var(--cream3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.75rem;color:var(--brown2);display:flex;align-items:center;gap:5px}
+.fp-chip button{background:none;border:none;color:var(--red);cursor:pointer;font-size:0.85rem;line-height:1;padding:0 2px}
+
+/* ── SUBMIT BTN ── */
+.sbtn{width:100%;background:linear-gradient(135deg,var(--brown2) 0%,var(--brown3) 100%);color:#fff;border:none;border-radius:12px;padding:15px 24px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:0.02em}
+.sbtn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(120,53,15,0.28)}
+.sbtn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.sbtn.loading{animation:btn-pulse 1.5s ease-in-out infinite}
+@keyframes btn-pulse{0%,100%{opacity:1}50%{opacity:0.7}}
+
+/* ── REF BANNER ── */
+.ref-banner{background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);border:1.5px solid #6ee7b7;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:18px;display:none}
+.ref-banner.show{display:flex;animation:rise 0.4s ease forwards}
+.ref-banner .ref-ico{font-size:1.5rem}
+.ref-banner .ref-info{flex:1}
+.ref-banner .ref-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#065f46;margin-bottom:2px}
+.ref-banner .ref-code{font-family:monospace;font-size:1.1rem;font-weight:700;color:#064e3b;letter-spacing:0.05em}
+.ref-banner .copy-ref{background:#064e3b;color:#fff;border:none;border-radius:7px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;transition:background .15s}
+.ref-banner .copy-ref:hover{background:#065f46}
+
+/* ── THANK-YOU OVERLAY ── */
+#thankyou-overlay{display:none;position:fixed;inset:0;background:rgba(120,53,15,0.7);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+#thankyou-overlay.open{display:flex}
+.ty-box{background:#fff;border-radius:20px;max-width:560px;width:100%;padding:40px 36px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.32)}
+.ty-ico{font-size:3.5rem;margin-bottom:14px;display:block}
+.ty-box h2{font-family:'Lora',serif;font-size:1.7rem;color:var(--brown3);margin-bottom:8px}
+.ty-box p{color:var(--muted2);font-size:0.88rem;line-height:1.7;margin-bottom:18px}
+.ty-ref{background:var(--cream3);border:2px solid var(--amber3);border-radius:10px;padding:14px 20px;margin:16px 0}
+.ty-ref .ref-lbl{font-size:0.72rem;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.ty-ref .ref-val{font-family:monospace;font-size:1.3rem;font-weight:700;color:var(--brown3);letter-spacing:0.06em}
+.ty-summary{background:var(--cream2);border-radius:10px;padding:14px 18px;margin:14px 0;text-align:left;font-size:0.83rem}
+.ty-summary .ty-row{display:flex;padding:5px 0;border-bottom:1px dashed #e5d5a3;gap:10px}
+.ty-summary .ty-row:last-child{border-bottom:none}
+.ty-summary .ty-k{width:130px;flex-shrink:0;font-weight:600;color:var(--muted2);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em}
+.ty-summary .ty-v{flex:1;color:var(--text)}
+.ty-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.ty-btn{flex:1;border:none;border-radius:9px;padding:11px 18px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all .15s}
+.ty-btn.primary{background:linear-gradient(135deg,var(--brown2) 0%,var(--brown3) 100%);color:#fff}
+.ty-btn.primary:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(120,53,15,0.3)}
+.ty-btn.outline{background:#fff;border:2px solid var(--border2);color:var(--muted2)}
+.ty-btn.outline:hover{border-color:var(--amber2);color:var(--brown2)}
+
+/* ── TRACK MODAL ── */
+#track-modal{display:none;position:fixed;inset:0;background:rgba(120,53,15,0.6);backdrop-filter:blur(4px);z-index:1500;align-items:center;justify-content:center;padding:20px}
+#track-modal.open{display:flex}
+.tbox{background:#fff;border-radius:16px;max-width:430px;width:100%;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.tbox h3{font-family:'Lora',serif;font-size:1.2rem;color:var(--brown3);margin-bottom:14px}
+.tbox input{margin-bottom:10px}
+.t-result{background:var(--cream);border-radius:9px;padding:14px;margin-top:12px;display:none;border:1.5px solid var(--border)}
+.t-status{font-size:1.05rem;font-weight:700;color:var(--brown2)}
+.t-date{font-size:0.78rem;color:var(--muted2);margin-top:4px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;background:#1c1007;color:#fff;border-radius:10px;padding:12px 20px;font-size:0.84rem;font-weight:500;z-index:3000;opacity:0;pointer-events:none;transition:opacity .3s;max-width:340px}
+#toast.show{opacity:1;pointer-events:auto}
+#toast.success{background:#064e3b}
+#toast.error{background:#7f1d1d}
+#toast.info{background:var(--brown3)}
+
+/* ── REVIEW BOX ── */
+#review-box{display:none}
+#review-box.open{display:block;animation:rise 0.35s ease forwards}
+.review-section{background:var(--cream2);border:1.5px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+.review-section h4{font-family:'Lora',serif;font-size:0.95rem;color:var(--brown3);margin-bottom:12px;padding-bottom:6px;border-bottom:1.5px solid var(--border)}
+.review-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed #e5d5a3;font-size:0.82rem}
+.review-row:last-child{border-bottom:none}
+.review-k{width:160px;flex-shrink:0;font-weight:600;color:var(--muted2);font-size:0.73rem;text-transform:uppercase;letter-spacing:0.04em}
+.review-v{flex:1;word-break:break-word}
+
+@media(max-width:700px){
+  .header-inner{flex-wrap:wrap}.header-pills{display:none}
+  .header-text h1{font-size:1.5rem}.row{flex-direction:column;gap:0}
+  .track-inline{display:none}.step{font-size:0.55rem;padding:5px 2px}.step .dot{width:18px;height:18px;margin-right:4px}
+  .ty-actions{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-badge">
+      <span class="logo-icon">📚</span>
+      <span class="logo-label">EBook</span>
+    </div>
+    <div class="header-text">
+      <div class="brand">Ebook Request Service</div>
+      <h1>Find Any Book, <span>Anywhere.</span></h1>
+      <p>We locate • We digitize • We deliver — Public Domain &amp; Non-Copyrighted Works</p>
+    </div>
+    <div class="header-pills">
+      <div class="pill amber">📖 Public Domain</div>
+      <div class="pill">🔍 Locate &amp; Deliver</div>
+      <div class="pill">📧 Email Delivery</div>
+      <div class="pill">🌐 Non-Copyrighted Works</div>
+    </div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-inner">
+      <div class="steps">
+        <div class="step on" id="wstep-1"><span class="dot">1</span>Your Info</div>
+        <div class="step" id="wstep-2"><span class="dot">2</span>Book Details</div>
+        <div class="step" id="wstep-3"><span class="dot">3</span>Review</div>
+        <div class="step" id="wstep-4"><span class="dot">4</span>Submitted</div>
+      </div>
+      <div class="track-inline">
+        <span class="track-lbl">📍 Track:</span>
+        <input type="text" id="track-hdr-input" placeholder="Enter reference #" maxlength="30"/>
+        <button class="track-btn" onclick="openTracker()">Track</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="disclaimer" id="disclaimer">
+  <div class="disclaimer-inner">
+    <span>📋</span>
+    <div><strong>Service Disclaimer:</strong> We do not sell books and we do not maintain a library of titles. Our service is focused solely on research and assistance in locating available copies of requested materials from online sources, including public domain content. We do not host, reproduce, or distribute copyrighted content. Any request we assist with is strictly limited to publicly available materials.</div>
+  </div>
+</div>
+
+<main>
+  <!-- REF BANNER -->
+  <div class="ref-banner" id="ref-banner">
+    <div class="ref-ico">✅</div>
+    <div class="ref-info">
+      <div class="ref-label">Your Reference Number</div>
+      <div class="ref-code" id="ref-code-display">—</div>
+    </div>
+    <button class="copy-ref" onclick="copyRef()">Copy</button>
+  </div>
+
+  <!-- CARD 1: PERSONAL INFO -->
+  <div class="card" id="card-info">
+    <div class="ch"><div class="ico">👤</div><h2>Your Information</h2></div>
+    <div class="cb">
+      <div class="row">
+        <div class="field">
+          <label>FB Full Name <span class="req">*</span></label>
+          <input type="text" id="client_name" name="client_name" placeholder="e.g. Juan dela Cruz" autocomplete="name"/>
+        </div>
+        <div class="field">
+          <label>Email Address <span class="req">*</span></label>
+          <input type="email" id="client_email" name="client_email" placeholder="yourname@email.com" autocomplete="email"/>
+          <div class="hint">We'll send the located ebook to this email address.</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Facebook Profile Link <span style="font-weight:400;color:var(--muted2)">(Optional)</span></label>
+        <input type="url" id="client_phone" name="client_phone" placeholder="e.g. https://facebook.com/yourname" autocomplete="url"/>
+        <div class="hint">We'll reach out to you via Facebook for updates on your request.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 2: BOOK REQUESTS -->
+  <div class="card" id="card-books">
+    <div class="ch"><div class="ico">📚</div><h2>Book Request Details</h2></div>
+    <div class="cb">
+      <div class="field" style="margin-bottom:18px">
+        <label>Preferred Format <span class="req">*</span></label>
+        <select id="preferred_format" name="preferred_format">
+          <option value="">— Select preferred format —</option>
+          <option>PDF</option>
+          <option>EPUB</option>
+          <option>MOBI</option>
+          <option>AZW3 (Kindle)</option>
+          <option>Any Available Format</option>
+        </select>
+        <div class="hint">Choose the format that works best for your device or reader app.</div>
+      </div>
+
+      <div class="field" style="margin-bottom:18px">
+        <label>If your preferred format is not available, are you okay with any available format? <span class="req">*</span></label>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <label style="flex:1;display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer;background:var(--cream2);border:1.5px solid var(--border);border-radius:9px;padding:12px 16px;transition:all .15s" id="any-format-yes-label">
+            <input type="radio" name="accept_any_format" id="accept_any_format_yes" value="Yes" style="width:17px;height:17px;accent-color:var(--amber2);cursor:pointer;flex-shrink:0" onchange="toggleAnyFormat('yes')"/>
+            <span>✅ Yes</span>
+          </label>
+          <label style="flex:1;display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer;background:var(--cream2);border:1.5px solid var(--border);border-radius:9px;padding:12px 16px;transition:all .15s" id="any-format-no-label">
+            <input type="radio" name="accept_any_format" id="accept_any_format_no" value="No" style="width:17px;height:17px;accent-color:var(--amber2);cursor:pointer;flex-shrink:0" onchange="toggleAnyFormat('no')"/>
+            <span>❌ No, preferred format only</span>
+          </label>
+        </div>
+        <div class="hint" id="any-format-hint" style="color:var(--red);display:none">⚠️ Please select Yes or No before submitting.</div>
+      </div>
+
+      <div class="field" style="margin-bottom:18px">
+        <label>Total Number of Books to Request <span class="req">*</span></label>
+        <input type="number" id="total_books" name="total_books" min="1" max="100" placeholder="e.g. 3" style="max-width:160px" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+        <div class="hint">Enter how many books you are requesting in total.</div>
+      </div>
+
+      <label style="margin-bottom:10px;display:block">Books to Request <span style="font-weight:400;color:var(--muted2)">(Fill in as many as you can — title, author, or upload a cover photo)</span></label>
+      <div class="books-list" id="books-list">
+        <!-- Book items rendered by JS -->
+      </div>
+      <button class="add-book-btn" onclick="addBook()">＋ Add Another Book</button>
+    </div>
+  </div>
+
+  <!-- CARD 3: ATTACHMENT (optional book cover photos) -->
+  <div class="card" id="card-attach">
+    <div class="ch"><div class="ico">🖼️</div><h2>Book Cover Photos (Optional)</h2></div>
+    <div class="cb">
+      <p style="font-size:0.83rem;color:var(--muted2);margin-bottom:14px">If you have a photo of the book cover or an image of the title page, attach it here to help us identify the exact edition.</p>
+      <div class="upload-zone" id="cover-zone" onclick="document.getElementById('cover-input').click()" ondrop="handleDrop(event,'cover-input','cover-zone')" ondragover="handleDragOver(event,'cover-zone')" ondragleave="handleDragLeave(event,'cover-zone')">
+        <div class="uz-ico">📷</div>
+        <p><strong>Click to upload</strong> or drag &amp; drop book cover images</p>
+        <p style="font-size:0.74rem;margin-top:4px">PNG, JPG, WEBP — 5MB each</p>
+        <input type="file" id="cover-input" multiple accept="image/*" onchange="handleFileSelect(event,'cover-input','cover-preview')"/>
+      </div>
+      <div class="file-preview" id="cover-preview"></div>
+    </div>
+  </div>
+
+  <!-- CARD 4: NOTES -->
+  <div class="card" id="card-notes">
+    <div class="ch"><div class="ico">📝</div><h2>Additional Notes</h2></div>
+    <div class="cb">
+      <div class="field">
+        <label>Any special instructions or notes?</label>
+        <textarea id="notes" name="notes" placeholder="e.g. I need the 2nd edition. I prefer the English translation. I need this urgently..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 5: REVIEW (dynamic) -->
+  <div class="card dynamic-section" id="card-review">
+    <div class="ch" style="background:linear-gradient(100deg,#064e3b 0%,#065f46 100%)"><div class="ico">🔍</div><h2>Review Your Request</h2></div>
+    <div class="cb">
+      <div id="review-content"></div>
+
+      <!-- PRIVACY, DISCLAIMER & AGREEMENTS -->
+      <div style="margin-top:6px;margin-bottom:18px;display:flex;flex-direction:column;gap:10px">
+
+        <!-- Privacy Policy -->
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-left:4px solid #3b82f6;border-radius:10px;padding:14px 16px;font-size:0.8rem;color:#1e3a5f;line-height:1.7">
+          <div style="font-weight:700;font-size:0.82rem;margin-bottom:5px;display:flex;align-items:center;gap:7px">🔒 Privacy Policy</div>
+          The personal information you provide — including your name, email address, and contact details — will be used <strong>solely for the purpose of processing and fulfilling your ebook request</strong>. We do not sell, share, or disclose your personal information to third parties. Your data is kept confidential and will only be used to communicate with you regarding your request. By submitting this form, you consent to the collection and use of your information as described.
+        </div>
+
+        <!-- Terms & Agreements -->
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-left:4px solid #22c55e;border-radius:10px;padding:14px 16px;font-size:0.8rem;color:#14532d;line-height:1.7">
+          <div style="font-weight:700;font-size:0.82rem;margin-bottom:5px;display:flex;align-items:center;gap:7px">📝 Terms &amp; Agreements</div>
+          <ul style="padding-left:16px;display:flex;flex-direction:column;gap:4px">
+            <li>This is a <strong>research assistance service</strong> only. We locate publicly available materials — we do not guarantee delivery of every title requested.</li>
+            <li>We do not reproduce, host, or distribute <strong>copyrighted content</strong>. Requests for clearly copyrighted materials outside the public domain may not be fulfilled.</li>
+            <li>Results depend on the <strong>availability of materials online</strong>. Processing time may vary.</li>
+            <li>We reserve the right to <strong>decline any request</strong> that falls outside our service scope.</li>
+            <li>A <strong>research fee of ₱49 per located ebook</strong> is required before we send your order. Once we locate your book, we will notify you via Facebook.</li>
+            <li>The <strong>quality of the located file is not guaranteed</strong> — we deliver based only on what is found and available online. Formatting, resolution, and completeness may vary.</li>
+            <li>Any communication or follow-up will be done through our <strong>Facebook Page</strong>.</li>
+          </ul>
+        </div>
+
+        <!-- Agreement Checkbox -->
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:#fff;border:2px solid var(--border);border-radius:10px;padding:14px 16px;transition:all .15s" id="agree-label">
+          <input type="checkbox" id="agree-checkbox" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--amber2);cursor:pointer" onchange="toggleAgree(this)"/>
+          <span style="font-size:0.83rem;color:var(--text);line-height:1.6">I have read and I agree to the <strong>Service Disclaimer</strong>, <strong>Privacy Policy</strong>, and <strong>Terms &amp; Agreements</strong> stated above. I understand that this is a research assistance service and not a book-selling platform.</span>
+        </label>
+        <div id="agree-hint" style="font-size:0.75rem;color:var(--red);display:none;padding:0 4px">⚠️ You must agree to the terms before submitting.</div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="ty-btn outline" onclick="closeReview()" style="flex:0.4;border:2px solid var(--border2);border-radius:9px;padding:11px 18px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;background:#fff;color:var(--muted2)">✏️ Edit Details</button>
+        <button class="sbtn" id="sbtn" onclick="submitRequest()" style="flex:1">📨 Submit Request</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN SUBMIT -->
+  <div class="card" id="card-submit">
+    <div class="cb" style="padding:18px 22px">
+      <button class="sbtn" id="review-btn" onclick="openReview()">📋 Review &amp; Confirm Request</button>
+    </div>
+  </div>
+</main>
+
+<!-- THANK YOU OVERLAY -->
+<div id="thankyou-overlay">
+  <div class="ty-box">
+    <span class="ty-ico">🎉</span>
+    <h2>Request Received!</h2>
+    <p>Thank you! Your ebook request has been submitted. We'll start searching for your books right away and email you once we've located them.</p>
+    <div class="ty-ref">
+      <div class="ref-lbl">Your Reference Number</div>
+      <div class="ref-val" id="ty-ref-display">—</div>
+    </div>
+    <div id="ty-summary"></div>
+    <div class="ty-actions">
+      <button class="ty-btn outline" onclick="openTrackerWithRef()">📍 Track Status</button>
+      <button class="ty-btn primary" onclick="resetFormAndClose()">📩 Submit Another Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRACK MODAL -->
+<div id="track-modal">
+  <div class="tbox">
+    <h3>📍 Track Your Request</h3>
+    <input type="text" id="track-input" placeholder="Enter reference number (e.g. EBR-20250001)" maxlength="30"/>
+    <button class="sbtn" onclick="trackStatus()">🔍 Check Status</button>
+    <div class="t-result" id="track-result">
+      <div class="t-status" id="track-status-val"></div>
+      <div class="t-date" id="track-status-date"></div>
+    </div>
+    <button onclick="document.getElementById('track-modal').classList.remove('open')" style="background:none;border:none;color:var(--muted2);font-size:0.82rem;margin-top:14px;cursor:pointer;width:100%;text-align:center">✕ Close</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const SCRIPT_URL = localStorage.getItem('ebr_script_url') || '';
+// ── HARDCODED IDs (also saved in admin config) ───────────────────────────────
+const SHEET_ID_LINK  = '13hbgb6mQadUxEhgPIywGI3__u_7gs_rLkbyjPb-aZZU';
+const FOLDER_LINK    = 'https://drive.google.com/drive/folders/1ySwDnk5k8bLdnBTpop3aYYlqBXq4nZHI';
+
+// ── STATE ───────────────────────────────────────────────────────────────────
+let bookCount = 1;
+let uploadedFiles = {};
+let formSubmitted = false;
+let _sessionRef = null;
+
+// ── BOOK MANAGEMENT ─────────────────────────────────────────────────────────
+function addBook(titleVal='', authorVal='') {
+  const list = document.getElementById('books-list');
+  const id = ++bookCount;
+  const div = document.createElement('div');
+  div.className = 'book-item';
+  div.id = `book-item-${id}`;
+  div.innerHTML = `
+    <div class="book-num">Book #${list.children.length + 1}</div>
+    ${id > 1 ? `<button class="remove-btn" onclick="removeBook(${id})">✕ Remove</button>` : ''}
+    <div class="row">
+      <div class="field">
+        <label>Book Title</label>
+        <input type="text" name="book_title" id="title-${id}" placeholder="e.g. The Art of War (optional if sending cover photo)" value="${titleVal}"/>
+      </div>
+      <div class="field">
+        <label>Author (if known)</label>
+        <input type="text" name="book_author" id="author-${id}" placeholder="e.g. Sun Tzu" value="${authorVal}"/>
+      </div>
+    </div>
+    <div class="field" style="margin-top:-4px">
+      <label>Additional Info (edition, year, ISBN — optional)</label>
+      <input type="text" name="book_extra" id="extra-${id}" placeholder="e.g. 3rd Edition, 2020 • ISBN 9781234567890"/>
+    </div>`;
+  list.appendChild(div);
+  renumberBooks();
+}
+
+function removeBook(id) {
+  const el = document.getElementById(`book-item-${id}`);
+  if (el) { el.remove(); renumberBooks(); }
+}
+
+function renumberBooks() {
+  document.querySelectorAll('.book-num').forEach((el, i) => {
+    el.textContent = `Book #${i + 1}`;
+  });
+  // Show/hide remove buttons — always keep first one
+  document.querySelectorAll('.book-item .remove-btn').forEach(btn => btn.style.display = 'inline-block');
+  const items = document.querySelectorAll('.book-item');
+  if (items.length === 1) {
+    const rb = items[0].querySelector('.remove-btn');
+    if (rb) rb.style.display = 'none';
+  }
+}
+
+// Initialize with one book
+(function initBooks() {
+  const list = document.getElementById('books-list');
+  list.innerHTML = '';
+  bookCount = 0;
+  addBook();
+  // Fix first item: no remove btn
+  const first = document.querySelector('.book-item');
+  const rb = first?.querySelector('.remove-btn');
+  if (rb) rb.remove();
+})();
+
+// ── FILE UPLOAD ──────────────────────────────────────────────────────────────
+function handleDragOver(e, zoneId) { e.preventDefault(); document.getElementById(zoneId)?.classList.add('drag'); }
+function handleDragLeave(e, zoneId) { document.getElementById(zoneId)?.classList.remove('drag'); }
+function handleDrop(e, inputId, zoneId) {
+  e.preventDefault();
+  document.getElementById(zoneId)?.classList.remove('drag');
+  const input = document.getElementById(inputId);
+  const dt = new DataTransfer();
+  Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+  input.files = dt.files;
+  handleFileSelect({target: input}, inputId, inputId.replace('-input', '-preview'));
+}
+function handleFileSelect(e, inputId, previewId) {
+  const files = Array.from(e.target.files);
+  if (!uploadedFiles[inputId]) uploadedFiles[inputId] = [];
+  files.forEach(f => {
+    if (f.size > 5 * 1024 * 1024) { toast(`${f.name} is too large (max 5MB).`, 'error'); return; }
+    uploadedFiles[inputId].push(f);
+  });
+  renderPreview(inputId, previewId);
+}
+function renderPreview(inputId, previewId) {
+  const preview = document.getElementById(previewId);
+  if (!preview) return;
+  const files = uploadedFiles[inputId] || [];
+  preview.innerHTML = files.map((f, i) => `
+    <div class="fp-chip">📄 ${f.name} <button onclick="removeFile('${inputId}','${previewId}',${i})">✕</button></div>`).join('');
+}
+function removeFile(inputId, previewId, idx) {
+  if (uploadedFiles[inputId]) { uploadedFiles[inputId].splice(idx, 1); renderPreview(inputId, previewId); }
+}
+
+// ── COLLECT BOOKS ────────────────────────────────────────────────────────────
+function collectBooks() {
+  const items = document.querySelectorAll('.book-item');
+  return Array.from(items).map((item, i) => {
+    const title = item.querySelector('[name="book_title"]')?.value?.trim() || '';
+    const author = item.querySelector('[name="book_author"]')?.value?.trim() || '';
+    const extra = item.querySelector('[name="book_extra"]')?.value?.trim() || '';
+    return { num: i + 1, title, author, extra };
+  });
+}
+
+// ── ANY FORMAT TOGGLE ────────────────────────────────────────────────────────
+function toggleAnyFormat(choice) {
+  const yesLabel = document.getElementById('any-format-yes-label');
+  const noLabel  = document.getElementById('any-format-no-label');
+  yesLabel.style.borderColor = choice === 'yes' ? 'var(--amber2)' : 'var(--border)';
+  yesLabel.style.background  = choice === 'yes' ? 'var(--amber4)' : 'var(--cream2)';
+  noLabel.style.borderColor  = choice === 'no'  ? 'var(--amber2)' : 'var(--border)';
+  noLabel.style.background   = choice === 'no'  ? 'var(--amber4)' : 'var(--cream2)';
+  document.getElementById('any-format-hint').style.display = 'none';
+}
+
+// ── VALIDATION ───────────────────────────────────────────────────────────────
+function validate() {
+  let ok = true;
+  function req(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!el.value.trim()) { el.classList.add('err'); ok = false; }
+    else el.classList.remove('err');
+  }
+  req('client_name'); req('client_email'); req('preferred_format'); req('total_books');
+  const anyFmtSelected = document.querySelector('input[name="accept_any_format"]:checked');
+  if (!anyFmtSelected) {
+    document.getElementById('any-format-yes-label').style.borderColor = 'var(--red)';
+    document.getElementById('any-format-no-label').style.borderColor  = 'var(--red)';
+    document.getElementById('any-format-hint').style.display = 'block';
+    ok = false;
+  }
+  // Email format
+  const em = document.getElementById('client_email');
+  if (em.value && !/\S+@\S+\.\S+/.test(em.value)) { em.classList.add('err'); ok = false; }
+  return ok;
+}
+
+// ── REVIEW ───────────────────────────────────────────────────────────────────
+const FORM_CARDS = ['card-info','card-books','card-attach','card-notes'];
+
+function openReview() {
+  if (!validate()) { toast('Please fill in all required fields.', 'error'); return; }
+  const books = collectBooks().filter(b => b.title);
+  const name  = document.getElementById('client_name').value.trim();
+  const email = document.getElementById('client_email').value.trim();
+  const phone = document.getElementById('client_phone').value.trim();
+  const fmt   = document.getElementById('preferred_format').value;
+  const anyFmt = document.querySelector('input[name="accept_any_format"]:checked')?.value || '—';
+  const totalBooks = document.getElementById('total_books').value.trim();
+  const notes = document.getElementById('notes').value.trim();
+  const coverCount = (uploadedFiles['cover-input'] || []).length;
+  const booksHtml = books.map(b =>
+    `<div style="padding:6px 0;border-bottom:1px dashed #e5d5a3">
+      <strong>${b.num}. ${b.title || '(cover photo only)'}</strong>${b.author ? ` — <em>${b.author}</em>` : ''}
+      ${b.extra ? `<br><span style="font-size:0.76rem;color:var(--muted2)">${b.extra}</span>` : ''}
+    </div>`).join('');
+
+  document.getElementById('review-content').innerHTML = `
+    <div class="review-section">
+      <h4>👤 Your Information</h4>
+      <div class="review-row"><div class="review-k">FB Full Name</div><div class="review-v">${name}</div></div>
+      <div class="review-row"><div class="review-k">Email</div><div class="review-v">${email}</div></div>
+      ${phone ? `<div class="review-row"><div class="review-k">Facebook Link</div><div class="review-v"><a href="${phone}" target="_blank" style="color:var(--amber)">${phone}</a></div></div>` : ''}
+    </div>
+    <div class="review-section">
+      <h4>📚 Book Request</h4>
+      <div class="review-row"><div class="review-k">Total Books</div><div class="review-v"><strong>${totalBooks}</strong> book(s)</div></div>
+      <div class="review-row"><div class="review-k">Preferred Format</div><div class="review-v">${fmt}</div></div>
+      <div class="review-row"><div class="review-k">Accept Any Format?</div><div class="review-v">${anyFmt === 'Yes' ? '✅ Yes' : '❌ No — preferred format only'}</div></div>
+      <div class="review-row"><div class="review-k">Books Listed (${books.length})</div><div class="review-v">${booksHtml || '<span style="color:var(--muted2);font-style:italic">See cover photos attached</span>'}</div></div>
+      ${notes ? `<div class="review-row"><div class="review-k">Notes</div><div class="review-v">${notes}</div></div>` : ''}
+      ${coverCount ? `<div class="review-row"><div class="review-k">Attachments</div><div class="review-v">🖼️ ${coverCount} cover image(s) uploaded</div></div>` : ''}
+    </div>`;
+
+  // Reset agreement checkbox
+  const cb = document.getElementById('agree-checkbox');
+  if (cb) { cb.checked = false; }
+  resetAgreeLabel();
+
+  // Hide all form cards, disclaimer, and submit button
+  FORM_CARDS.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  document.getElementById('disclaimer').style.display = 'none';
+  document.getElementById('card-submit').style.display = 'none';
+
+  // Show review card
+  const reviewCard = document.getElementById('card-review');
+  reviewCard.classList.add('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setStep(3);
+}
+
+function closeReview() {
+  // Hide review card
+  document.getElementById('card-review').classList.remove('visible');
+
+  // Restore all form cards and disclaimer
+  FORM_CARDS.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = ''; });
+  document.getElementById('disclaimer').style.display = '';
+  document.getElementById('card-submit').style.display = '';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setStep(2);
+}
+
+function toggleAgree(cb) {
+  const label = document.getElementById('agree-label');
+  if (cb.checked) {
+    label.style.borderColor = 'var(--green)';
+    label.style.background  = '#f0fdf4';
+    document.getElementById('agree-hint').style.display = 'none';
+  } else {
+    resetAgreeLabel();
+  }
+}
+
+function resetAgreeLabel() {
+  const label = document.getElementById('agree-label');
+  if (label) { label.style.borderColor = 'var(--border)'; label.style.background = '#fff'; }
+  document.getElementById('agree-hint').style.display = 'none';
+}
+
+// ── SUBMIT ───────────────────────────────────────────────────────────────────
+async function submitRequest() {
+  if (formSubmitted) return;
+  // Check agreement
+  if (!document.getElementById('agree-checkbox').checked) {
+    document.getElementById('agree-label').style.borderColor = 'var(--red)';
+    document.getElementById('agree-label').style.background  = '#fff5f5';
+    document.getElementById('agree-hint').style.display = 'block';
+    document.getElementById('agree-label').scrollIntoView({ behavior:'smooth', block:'center' });
+    toast('Please agree to the terms before submitting.', 'error');
+    return;
+  }
+  const btn = document.getElementById('sbtn');
+  btn.disabled = true; btn.textContent = '⏳ Submitting...'; btn.classList.add('loading');
+  formSubmitted = true;
+
+  const ref = generateRef();
+  _sessionRef = ref;
+
+  const books = collectBooks().filter(b => b.title);
+  const payload = {
+    action: 'submit',
+    reference_no: ref,
+    client_name: document.getElementById('client_name').value.trim(),
+    client_email: document.getElementById('client_email').value.trim(),
+    client_phone: document.getElementById('client_phone').value.trim(),
+    preferred_format: document.getElementById('preferred_format').value,
+    accept_any_format: (document.querySelector('input[name="accept_any_format"]:checked')?.value) || 'No',
+    total_books_requested: document.getElementById('total_books').value.trim(),
+    books_requested: books.map(b => `${b.title || '(cover photo)'}${b.author ? ' by ' + b.author : ''}${b.extra ? ' [' + b.extra + ']' : ''}`).join(' | '),
+    books_count: books.length,
+    notes: document.getElementById('notes').value.trim(),
+    status: 'Received',
+    submitted_at: new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' })
+  };
+
+  let success = false;
+  if (SCRIPT_URL && !SCRIPT_URL.includes('YOUR_SCRIPT') && SCRIPT_URL !== '') {
+    try {
+      const fd = new FormData();
+      Object.entries(payload).forEach(([k, v]) => fd.append(k, v));
+      const coverFiles = uploadedFiles['cover-input'] || [];
+      coverFiles.forEach((f, i) => fd.append(`cover_${i}`, f, f.name));
+      await fetch(SCRIPT_URL, { method: 'POST', body: fd });
+      success = true;
+    } catch (err) {
+      success = true; // still show confirmation
+    }
+  } else {
+    success = true; // demo mode
+  }
+
+  if (success) {
+    showThankYou(ref, payload);
+    setStep(4);
+  }
+}
+
+function generateRef() {
+  const now = new Date();
+  const yy = now.getFullYear().toString().slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const rnd = Math.floor(1000 + Math.random() * 9000);
+  return `EBR-${yy}${mm}${dd}-${rnd}`;
+}
+
+function showThankYou(ref, data) {
+  document.getElementById('ty-ref-display').textContent = ref;
+  document.getElementById('ref-code-display').textContent = ref;
+  document.getElementById('ref-banner').classList.add('show');
+  const books = collectBooks().filter(b => b.title);
+  document.getElementById('ty-summary').innerHTML = `
+    <div class="ty-summary">
+      <div class="ty-row"><div class="ty-k">Name</div><div class="ty-v">${data.client_name}</div></div>
+      <div class="ty-row"><div class="ty-k">Email</div><div class="ty-v">${data.client_email}</div></div>
+      <div class="ty-row"><div class="ty-k">Format</div><div class="ty-v">${data.preferred_format}</div></div>
+      <div class="ty-row"><div class="ty-k">Total Books</div><div class="ty-v">${data.total_books_requested} book(s)</div></div>
+      <div class="ty-row"><div class="ty-k">Books</div><div class="ty-v">${books.length} book(s) requested</div></div>
+    </div>`;
+  document.getElementById('thankyou-overlay').classList.add('open');
+}
+
+function copyRef() {
+  const ref = document.getElementById('ref-code-display').textContent;
+  navigator.clipboard?.writeText(ref).then(() => toast('Reference number copied!', 'success'));
+}
+function resetFormAndClose() {
+  document.getElementById('thankyou-overlay').classList.remove('open');
+  resetForm();
+}
+function resetForm() {
+  formSubmitted = false; uploadedFiles = {}; _sessionRef = null;
+  document.querySelectorAll('input,select,textarea').forEach(el => {
+    if (el.type !== 'file' && el.type !== 'radio' && el.type !== 'checkbox') el.value = '';
+    if (el.type === 'radio' || el.type === 'checkbox') el.checked = false;
+    el.classList.remove('err');
+  });
+  FORM_CARDS.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = ''; });
+  document.getElementById('disclaimer').style.display = '';
+  const agreeCb = document.getElementById('agree-checkbox');
+  if (agreeCb) agreeCb.checked = false;
+  resetAgreeLabel();
+  document.getElementById('ref-banner').classList.remove('show');
+  document.getElementById('cover-preview').innerHTML = '';
+  document.querySelectorAll('input[name="accept_any_format"]').forEach(r => r.checked = false);
+  ['any-format-yes-label','any-format-no-label'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.borderColor = 'var(--border)'; el.style.background = 'var(--cream2)'; }
+  });
+  document.getElementById('any-format-hint').style.display = 'none';
+  const btn = document.getElementById('sbtn');
+  if (btn) { btn.disabled = false; btn.textContent = '📨 Submit Request'; btn.classList.remove('loading'); }
+  // Reinit books
+  const list = document.getElementById('books-list');
+  list.innerHTML = '';
+  bookCount = 0;
+  addBook();
+  const first = document.querySelector('.book-item');
+  const rb = first?.querySelector('.remove-btn');
+  if (rb) rb.remove();
+  setStep(1);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('Form cleared — ready for a new request.', 'info');
+}
+
+// ── STEP INDICATOR ──────────────────────────────────────────────────────────
+function setStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const s = document.getElementById(`wstep-${i}`);
+    if (s) { if (i <= n) s.classList.add('on'); else s.classList.remove('on'); }
+  }
+}
+document.querySelectorAll('input,select,textarea').forEach(el => {
+  el.addEventListener('focus', () => { setStep(2); el.closest('.card')?.style.setProperty('box-shadow', '0 10px 42px rgba(120,53,15,0.14)'); });
+  el.addEventListener('blur', () => { el.closest('.card')?.style.removeProperty('box-shadow'); el.classList.remove('err'); });
+});
+
+// ── TRACKER ─────────────────────────────────────────────────────────────────
+function openTracker() {
+  const hdrInput = document.getElementById('track-hdr-input');
+  const trackInput = document.getElementById('track-input');
+  if (hdrInput?.value) trackInput.value = hdrInput.value;
+  document.getElementById('track-modal').classList.add('open');
+}
+function openTrackerWithRef() {
+  const ref = _sessionRef || document.getElementById('ty-ref-display').textContent;
+  document.getElementById('track-input').value = ref;
+  document.getElementById('track-modal').classList.add('open');
+  setTimeout(trackStatus, 300);
+}
+async function trackStatus() {
+  const ref = document.getElementById('track-input').value.trim().toUpperCase();
+  if (!ref) { toast('Please enter your reference number.', 'error'); return; }
+  const result = document.getElementById('track-result');
+  const statusVal = document.getElementById('track-status-val');
+  const statusDate = document.getElementById('track-status-date');
+  statusVal.textContent = '⏳ Checking...'; statusDate.textContent = ''; result.style.display = 'block';
+  if (SCRIPT_URL && SCRIPT_URL !== '') {
+    try {
+      const res = await fetch(`${SCRIPT_URL}?action=track&ref=${encodeURIComponent(ref)}`);
+      const json = await res.json();
+      if (json.found) {
+        statusVal.textContent = json.status || 'Unknown';
+        statusDate.textContent = (json.updated_at || '') + (json.books_requested ? ' • ' + json.books_requested.split('|')[0] : '');
+      } else {
+        statusVal.textContent = '❓ Reference not found';
+        statusDate.textContent = 'Please double-check your reference number.';
+      }
+    } catch (e) { statusVal.textContent = '⚠️ Unable to connect'; statusDate.textContent = 'Please try again in a moment.'; }
+  } else {
+    statusVal.textContent = 'Received — Pending Search';
+    statusDate.textContent = 'Demo mode — connect to Google Sheets to track live.';
+  }
+}
+document.getElementById('track-modal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.className = 'show ' + type;
+  t.textContent = type === 'success' ? '✅ ' + msg : type === 'error' ? '❌ ' + msg : 'ℹ️ ' + msg;
+  setTimeout(() => { t.className = ''; }, 4000);
+}
+</script>
+</body>
+</html>
